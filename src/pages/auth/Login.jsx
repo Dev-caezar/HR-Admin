@@ -7,6 +7,7 @@ import * as yup from 'yup';
 // import { setUserData, setUserToken } from '../../../../Redux_Project/src/utils/Features';
 import { Flex, Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 const Login = () => {
    const navigate = useNavigate()
@@ -39,30 +40,46 @@ const Login = () => {
       password: yup.string().required("Password is required"),
    })
 
-   const API_BASE_URL = "https://product-api-mrbb.onrender.com"
    const validateForm = async (e) => {
       e.preventDefault();
-      setLoading(true)
+      setLoading(true);
       try {
-         await validationSchema.validate(formData, { abortEarly: false })
-         const response = await axios.post(`${API_BASE_URL}/login`, formData)
-         // dispatch(setUserData(response.data.data))
-         // dispatch(setUserToken(response.data.token))
-         navigate("/")
-         console.log(response.data);
+         await validationSchema.validate(formData, { abortEarly: false });
+
+         // --- Successful Validation (e.g., now submit to API) ---
+         // ... (API login call here) ...
+
+         toast.success("Login successful");
+         navigate("/admin-dashboard");
+
       } catch (error) {
          if (error.name === "ValidationError") {
-            console.log("Validation errors:", error.inner);
+            // 1. Show a general error toast
+            toast.error("Please correct the form errors and try again.");
+
+            // 2. Process errors to display to the user
+            const validationErrors = {};
+            error.inner.forEach(err => {
+               // Map the error message to the correct field (err.path)
+               // This is crucial for displaying errors next to the fields
+               validationErrors[err.path] = err.message;
+            });
+
+            console.log("Validation errors:", validationErrors);
+            // You would typically use a function here to set these errors 
+            // into your form state, e.g., setFormErrors(validationErrors);
+
          } else {
             console.error("An unexpected error occurred:", error);
+            toast.error("An unexpected error occurred. Please try again later.");
          }
       }
-      setLoading(false)
+      setLoading(false);
    }
-
 
    return (
       <div className="h-screen w-full bg-gradient-to-r from-purple-500 to-white flex justify-center items-center p-4">
+         <ToastContainer />
          <div className="w-full max-w-[40%] bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
             <h2 className="text-3xl font-bold mb-8 text-gray-800 text-center">Welcome Back 👋</h2>
             <p className="text-center text-gray-500 mb-8">Sign in to continue to your account.</p>
